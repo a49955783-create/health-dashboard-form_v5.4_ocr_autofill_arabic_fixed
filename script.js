@@ -1,140 +1,46 @@
-// script.js - OCR auto-distribute numeric codes into units list (direct distribution + managers)
-const $ = id => document.getElementById(id);
-const unitsList = $('unitsList');
-const fileInput = $('fileInput');
-const ocrMode = $('ocrMode');
-const resultArea = $('resultArea');
-const toast = $('toast');
-const managersList = document.getElementById('managersList');
-const addManagerBtn = document.getElementById('addManager');
-
-let managers = [];
-
-// toast
-function showToast(msg, time=2000){
-  toast.innerText = msg; toast.style.display = 'block';
-  setTimeout(()=> toast.style.display='none', time);
-}
-
-// managers handling
-function renderManagers(){
-  managersList.innerHTML = '';
-  managers.forEach((m, idx)=>{
-    const div = document.createElement('div'); div.className='pill';
-    div.innerHTML = `${m.name || ''} ${m.code? '| '+m.code : ''} <button data-i="${idx}" class="btn muted del-manager">حذف</button>`;
-    managersList.appendChild(div);
-  });
-}
-addManagerBtn.addEventListener('click', ()=>{
-  const name = document.getElementById('managerName').value.trim();
-  const code = document.getElementById('managerCode').value.trim();
-  if(!name && !code){ showToast('أدخل اسم أو كود المسؤول'); return; }
-  managers.push({name, code});
-  document.getElementById('managerName').value=''; document.getElementById('managerCode').value='';
-  renderManagers(); updateResult(); showToast('تم إضافة مسؤول الفترة');
-});
-managersList.addEventListener('click', (e)=>{
-  if(e.target.classList.contains('del-manager')){
-    const i = parseInt(e.target.dataset.i,10);
-    if(!isNaN(i)){ managers.splice(i,1); renderManagers(); updateResult(); showToast('تم الحذف'); }
-  }
-});
-
-// units
-function createUnit(data={code:'',status:'',loc:'',dist:''}){
-  const row = document.createElement('div'); row.className='unit-row';
-  row.innerHTML = `
-    <div class="col"><input class="code-input" value="${data.code||''}" placeholder="الكود"></div>
-    <div class="col"><input class="status-input" value="${data.status||''}" placeholder="الحالة"></div>
-    <div class="col"><input class="loc-input" value="${data.loc||''}" placeholder="الموقع"></div>
-    <div class="col"><input class="dist-input" value="${data.dist||''}" placeholder="توزيع الحالة"></div>
-    <div class="unit-actions">
-      <button class="btn edit-btn">تعديل</button>
-      <button class="btn add-partner-btn">شريك</button>
-      <button class="btn delete-btn">حذف</button>
-    </div>
-  `;
-  // actions
-  row.querySelector('.delete-btn').addEventListener('click', ()=>{ row.remove(); updateResult(); showToast('تم الحذف'); });
-  row.querySelector('.add-partner-btn').addEventListener('click', ()=>{
-    const p = prompt('أدخل كود الشريك'); if(p){ const codeInput = row.querySelector('.code-input'); codeInput.value = codeInput.value ? (codeInput.value + ' + ' + p) : p; updateResult(); showToast('تم إضافة شريك'); }
-  });
-  row.querySelector('.edit-btn').addEventListener('click', ()=> row.querySelector('.code-input').focus());
-  row.querySelectorAll('input').forEach(inp => inp.addEventListener('input', ()=> updateResult()));
-  unitsList.appendChild(row);
-  return row;
-}
-
-// ensure one row initially
-createUnit();
-
-$('addUnit').addEventListener('click', ()=>{ createUnit(); updateResult(); });
-
-// OCR handling (paste + file input)
-document.addEventListener('paste', async (e)=>{
-  if(!e.clipboardData) return;
-  for(const item of e.clipboardData.items){
-    if(item.type.indexOf('image') !== -1){
-      const file = item.getAsFile(); if(file) await handleFile(file);
-    }
-  }
-});
-fileInput.addEventListener('change', async (e)=>{ const f = e.target.files[0]; if(!f) return; await handleFile(f); fileInput.value=''; });
-
-async function handleFile(file){
-  showToast('جاري تحليل الصورة — انتظر قليلاً...', 3000);
-  try{
-    const worker = Tesseract.createWorker();
-    await worker.load(); await worker.loadLanguage('ara+eng'); await worker.initialize('ara+eng');
-    await worker.setParameters({ tessedit_pageseg_mode: '6', tessedit_char_whitelist: '0123456789' });
-    const { data: { text } } = await worker.recognize(file);
-    await worker.terminate();
-    const numbers = (text.match(/\d{2,6}/g) || []).map(s=>s.trim());
-    if(numbers.length === 0){ showToast('لم يتم العثور على أكواد رقمية في الصورة', 3000); return; }
-    const mode = ocrMode.value;
-    if(mode === 'replace'){ unitsList.innerHTML = ''; numbers.forEach(n=> createUnit({code:n})); }
-    else { numbers.forEach(n=> createUnit({code:n})); }
-    updateResult(); showToast(`تم استخراج ${numbers.length} كود وتوزيعها`, 2500);
-  }catch(err){
-    console.error(err); showToast('حصل خطأ أثناء تحليل الصورة', 3000);
-  }
-}
-
-// build final result text
-function updateResult(){
-  const lines = [];
-  const opsName = $('opsName').value || '';
-  const opsCode = $('opsCode').value || '';
-  const deputy = $('opsDeputy').value || '';
-  const deputyCode = $('opsDeputyCode').value || '';
-  lines.push('استلام العمليات');
-  lines.push(`اسم العمليات : ${opsName}${opsCode? ' | '+opsCode : ''}`);
-  lines.push(`نائب مركز العمليات : ${deputy}${deputyCode? ' | '+deputyCode : ''}`);
-  lines.push('');
-  lines.push('القيادات'); lines.push('-');
-  lines.push(''); lines.push('الضباط'); lines.push('-');
-  lines.push(''); lines.push('مسؤول فترة'); 
-  if(managers.length) lines.push(managers.map(m=> (m.name? m.name+' ':'') + (m.code? '| '+m.code:'')).join(' , ')); else lines.push('-');
-  lines.push(''); lines.push('ضباط الصف'); lines.push('-');
-  lines.push(''); lines.push('توزيع الوحدات');
-  const rows = unitsList.querySelectorAll('.unit-row');
-  if(rows.length === 0) lines.push('-'); else {
-    rows.forEach(r=>{
-      const code = r.querySelector('.code-input').value.trim();
-      const loc = r.querySelector('.loc-input').value.trim();
-      const status = r.querySelector('.status-input').value.trim();
-      const dist = r.querySelector('.dist-input').value.trim();
-      if(code) lines.push(`${code}${loc? ' | '+loc : ''}${status? ' | '+status : ''}${dist? ' | '+dist : ''}`);
-    });
-  }
-  lines.push(''); lines.push('وحدات سبيد يونت'); lines.push('-'); lines.push(''); lines.push('وحدات دباب'); lines.push('-'); lines.push(''); lines.push('وحدات الهلي'); lines.push('-');
-  lines.push(''); lines.push('وقت الاستلام: —'); lines.push('وقت التسليم: —'); lines.push(''); lines.push('تم التسليم إلى :');
-  resultArea.innerText = lines.join('\n');
-}
-
-// copy result
-$('copyResult').addEventListener('click', ()=>{ navigator.clipboard.writeText(resultArea.innerText).then(()=> showToast('تم نسخ النتيجة',1500)).catch(()=> showToast('فشل النسخ',1500)); });
-
-// initial render
-renderManagers();
-updateResult();
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+:root{--bg:#061025;--card:#071726;--accent:#2ea043;--muted:#9fb0c6;--input:#0f1b22}
+*{box-sizing:border-box;font-family:'Tajawal',sans-serif}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#02050a);color:#e6eef3;direction:rtl}
+.intro-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:linear-gradient(180deg,rgba(2,8,20,.6),rgba(2,8,20,.6))}
+.intro-card{background:linear-gradient(135deg,#042233,#043047);padding:28px;border-radius:12px;text-align:center;box-shadow:0 12px 40px rgba(3,7,18,.6)}
+.intro-title{font-size:30px;color:#bfe8ff;font-weight:800}
+.intro-sub{margin-top:6px;color:#bcdff0;font-size:15px}
+.topbar{background:linear-gradient(90deg,#042033,#043047);padding:14px 20px;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+.topbar .brand{font-weight:700;color:#bfe8ff;font-size:18px}
+.container{max-width:1100px;margin:18px auto;padding:14px;background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+.row{margin-bottom:10px}
+.inputs-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.inline{display:flex;gap:8px;align-items:center}
+.input{background:var(--input);border:1px solid rgba(255,255,255,0.04);color:#e6eef3;padding:10px;border-radius:8px;min-width:0}
+.input.small{width:220px}
+.btn{border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);color:#042018}
+.btn.muted{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+.groups-wrap{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:6px}
+.group-col{background:transparent;padding:8px;border-radius:8px}
+.pills-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pill{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:8px;align-items:center}
+.controls{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center;margin:10px 0}
+.file-input{background:transparent;color:#e6eef3;border:1px dashed rgba(255,255,255,0.04);padding:8px;border-radius:8px}
+.mode-select{width:180px;padding:8px;border-radius:8px;background:var(--input);color:#e6eef3;border:1px solid rgba(255,255,255,0.04)}
+.note{color:#9fb0c6;font-size:13px;margin-top:6px}
+.preview-wrap{margin-top:8px}
+.preview-wrap img{max-width:200px;border-radius:8px;display:block}
+.progress-wrap{height:8px;background:rgba(255,255,255,0.03);border-radius:6px;margin-top:6px;overflow:hidden}
+.progress-wrap #progressBar{height:100%;background:linear-gradient(90deg,#6fd48b,#3fa9f5);width:0%}
+.units-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.unit-row{display:flex;gap:8px;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);flex-wrap:wrap}
+.unit-row .col{min-width:0;flex:1}
+.unit-row input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:#e6eef3}
+.unit-actions{display:flex;gap:8px;align-items:center}
+.result-section{margin-top:14px}
+.result-area{min-height:220px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#03121a,#021217);color:#e6eef3;border:1px solid rgba(255,255,255,0.03);white-space:pre-wrap;overflow:auto}
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:9999;opacity:0;pointer-events:none;transition:all .12s ease}
+.modal[aria-hidden="false"]{opacity:1;pointer-events:auto}
+.modal-card{background:linear-gradient(180deg,#042233,#043047);padding:18px;border-radius:12px;width:420px;box-shadow:0 12px 40px rgba(2,8,20,.8);border:1px solid rgba(255,255,255,0.03)}
+.modal-top{display:flex;justify-content:space-between;align-items:center}
+.modal-body label{display:block;margin-top:8px;color:#cfe7ff}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#0b2f1f;padding:8px 12px;border-radius:8px;display:none;color:#cfeee2}
+@media(max-width:900px){.groups-wrap{grid-template-columns:1fr}.inputs-row{flex-direction:column}.file-input{width:100%}.mode-select{width:100%}.unit-row{flex-direction:column}}
