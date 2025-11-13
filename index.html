@@ -13,6 +13,7 @@
   </header>
 
   <main class="container">
+    <!-- بيانات العمليات -->
     <section class="form-top">
       <div class="row inputs-row">
         <label>اسم العمليات (الاسم + الكود)</label>
@@ -28,8 +29,20 @@
           <input id="opsDeputyCode" class="input small" placeholder="كود النائب">
         </div>
       </div>
+
+      <!-- مسؤول الفترة -->
+      <div class="row inputs-row">
+        <label>مسؤول الفترة (الاسم + الكود)</label>
+        <div class="inline">
+          <input id="managerName" class="input" placeholder="الاسم">
+          <input id="managerCode" class="input small" placeholder="الكود">
+          <button id="addManager" class="btn primary">أضف مسؤول الفترة</button>
+        </div>
+      </div>
+      <div id="managersList" class="pills-wrap"></div>
     </section>
 
+    <!-- وحدات -->
     <section class="units-section">
       <div class="controls">
         <button id="addUnit" class="btn primary">+ إضافة وحدة جديدة</button>
@@ -42,11 +55,10 @@
         <button id="pasteHint" class="btn muted">Ctrl+V للصق</button>
       </div>
 
-      <div id="unitsList" class="units-list">
-        <!-- صفوف الوحدات ستضاف هنا -->
-      </div>
+      <div id="unitsList" class="units-list"></div>
     </section>
 
+    <!-- النتيجة -->
     <section class="result-section">
       <div class="result-actions">
         <button id="copyResult" class="btn primary small">نسخ</button>
