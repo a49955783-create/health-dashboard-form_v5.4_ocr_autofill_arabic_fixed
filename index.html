@@ -1,52 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>نظام العمليات - لوحة التحكم</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>شرطة ريسبكت — تحديث مركز العمليات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h2>نظام العمليات</h2>
+  <header class="topbar">
+    <div class="brand">تحديث مركز العمليات للشرطة</div>
+  </header>
 
-    <div class="upload-section">
-      <label for="imageUpload">رفع صورة لاستخراج الأكواد:</label>
-      <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg,.webp" />
-    </div>
+  <main class="container">
+    <section class="form-top">
+      <div class="row inputs-row">
+        <label>اسم العمليات (الاسم + الكود)</label>
+        <div class="inline">
+          <input id="opsName" class="input small" placeholder="اسم العمليات">
+          <input id="opsCode" class="input small" placeholder="كود العمليات">
+        </div>
+      </div>
+      <div class="row inputs-row">
+        <label>نائب مركز العمليات (الاسم + الكود)</label>
+        <div class="inline">
+          <input id="opsDeputy" class="input small" placeholder="اسم النائب">
+          <input id="opsDeputyCode" class="input small" placeholder="كود النائب">
+        </div>
+      </div>
+    </section>
 
-    <div class="options">
-      <label><input type="radio" name="ocrMode" value="merge" checked /> دمج</label>
-      <label><input type="radio" name="ocrMode" value="replace" /> استبدال</label>
-    </div>
+    <section class="units-section">
+      <div class="controls">
+        <button id="addUnit" class="btn primary">+ إضافة وحدة جديدة</button>
+        <select id="ocrMode" class="input mode-select" title="وضع التوزيع">
+          <option value="replace">استبدال</option>
+          <option value="merge">دمج (أضف كسطر)</option>
+        </select>
+        <label class="file-label">رفع/لصق صورة لاستخراج الأكواد:</label>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" class="file-input">
+        <button id="pasteHint" class="btn muted">Ctrl+V للصق</button>
+      </div>
 
-    <table id="dataTable">
-      <thead>
-        <tr>
-          <th>الكود</th>
-          <th>الحالة</th>
-          <th>الموقع</th>
-          <th>توزيع الحالة</th>
-          <th>تعديل</th>
-          <th>إضافة شريك</th>
-          <th>حذف</th>
-        </tr>
-      </thead>
-      <tbody id="dataBody">
-        <tr>
-          <td contenteditable="true"></td>
-          <td contenteditable="true"></td>
-          <td contenteditable="true"></td>
-          <td contenteditable="true"></td>
-          <td><button class="edit-btn">✏️</button></td>
-          <td><button class="add-btn">➕</button></td>
-          <td><button class="delete-btn">❌</button></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+      <div id="unitsList" class="units-list">
+        <!-- صفوف الوحدات ستضاف هنا -->
+      </div>
+    </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.2/dist/tesseract.min.js"></script>
+    <section class="result-section">
+      <div class="result-actions">
+        <button id="copyResult" class="btn primary small">نسخ</button>
+      </div>
+      <label>النتيجة النهائية (قابلة للتحرير)</label>
+      <div id="resultArea" class="result-area" contenteditable="true"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
