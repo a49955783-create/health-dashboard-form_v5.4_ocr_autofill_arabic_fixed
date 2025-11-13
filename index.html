@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نظام العمليات - لوحة التحكم</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>نظام العمليات</h2>
+
+    <div class="upload-section">
+      <label for="imageUpload">رفع صورة لاستخراج الأكواد:</label>
+      <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg,.webp" />
+    </div>
+
+    <div class="options">
+      <label><input type="radio" name="ocrMode" value="merge" checked /> دمج</label>
+      <label><input type="radio" name="ocrMode" value="replace" /> استبدال</label>
+    </div>
+
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>الكود</th>
+          <th>الحالة</th>
+          <th>الموقع</th>
+          <th>توزيع الحالة</th>
+          <th>تعديل</th>
+          <th>إضافة شريك</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody id="dataBody">
+        <tr>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td><button class="edit-btn">✏️</button></td>
+          <td><button class="add-btn">➕</button></td>
+          <td><button class="delete-btn">❌</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.2/dist/tesseract.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
