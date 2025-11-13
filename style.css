@@ -1,70 +1,25 @@
-body {
-  font-family: "Tajawal", sans-serif;
-  background-color: #f4f6f9;
-  direction: rtl;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  width: 95%;
-  max-width: 900px;
-  margin: 20px auto;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-.upload-section {
-  margin-bottom: 10px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 15px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
-}
-
-th {
-  background-color: #4CAF50;
-  color: white;
-}
-
-td[contenteditable="true"] {
-  background-color: #fdfdfd;
-  outline: none;
-}
-
-button {
-  cursor: pointer;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-}
-
-.edit-btn { background-color: #ffcc00; }
-.add-btn { background-color: #4CAF50; color: white; }
-.delete-btn { background-color: #e74c3c; color: white; }
-
-@media (max-width: 768px) {
-  .container {
-    width: 100%;
-    margin: 0;
-    border-radius: 0;
-  }
-  table {
-    font-size: 13px;
-  }
-  td, th {
-    padding: 5px;
-  }
-}
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+:root{--bg:#061025;--card:#071726;--accent:#2ea043;--muted:#9fb0c6;--input:#0f1b22}
+*{box-sizing:border-box;font-family:'Tajawal',sans-serif}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#02050a);color:#e6eef3;direction:rtl}
+.topbar{background:linear-gradient(90deg,#042033,#043047);padding:14px 20px;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+.topbar .brand{font-weight:700;color:#bfe8ff;font-size:18px}
+.container{max-width:1100px;margin:18px auto;padding:14px;background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+.form-top .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px}
+.inline{display:flex;gap:8px;align-items:center}
+.input{background:var(--input);border:1px solid rgba(255,255,255,0.04);color:#e6eef3;padding:10px;border-radius:8px;min-width:0}
+.input.small{width:220px}
+.btn{border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);color:#042018}
+.btn.muted{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.mode-select{width:160px;padding:8px;border-radius:8px;background:var(--input);color:#e6eef3;border:1px solid rgba(255,255,255,0.04)}
+.units-list{display:flex;flex-direction:column;gap:10px}
+.unit-row{display:flex;gap:8px;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);flex-wrap:wrap}
+.unit-row .col{min-width:0;flex:1}
+.unit-row input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:#e6eef3}
+.unit-actions{display:flex;gap:8px;align-items:center}
+.result-section{margin-top:14px}
+.result-area{min-height:240px;padding:12px;border-radius:10px;background:linear-gradient(180deg,#03121a,#021217);color:#e6eef3;border:1px solid rgba(255,255,255,0.03);white-space:pre-wrap;overflow:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#0b2f1f;padding:8px 12px;border-radius:8px;display:none;color:#cfeee2}
+@media(max-width:900px){.form-top .row{flex-direction:column;align-items:stretch}.input.small{width:100%}.controls{flex-direction:column;align-items:stretch}}
